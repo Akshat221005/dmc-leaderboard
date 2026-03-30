@@ -92,6 +92,10 @@ fetch('./leaderboard.json?t=' + new Date().getTime())
 })
 .catch(err => console.error("Error:", err));
 </script>
-
+<script>
+setInterval(() => {
+    location.reload();
+}, 10000); // refresh every 10 sec
+</script>
 </body>
 </html>
