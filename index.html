@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DMC Leaderboard</title>
+</head>
+<body>
+    <h1>DMC Leaderboard</h1>
+    <table border="1" id="table"></table>
+
+    <script>
+        fetch('leaderboard.json')
+        .then(res => res.json())
+        .then(data => {
+            let table = document.getElementById("table");
+
+            data.forEach((row, i) => {
+                let tr = `<tr>
+                    <td>${i+1}</td>
+                    <td>${row.Team}</td>
+                    <td>${row.MSE.toFixed(4)}</td>
+                </tr>`;
+                table.innerHTML += tr;
+            });
+        });
+    </script>
+</body>
+</html>
