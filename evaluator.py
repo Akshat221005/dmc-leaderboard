@@ -153,7 +153,7 @@ def check_and_run(team):
         run_pipeline()
     else:
         print(f"⏳ Waiting for model.pkl in {team}")
-        
+
 # ===== MAIN =====
 if __name__ == "__main__":
 
@@ -176,3 +176,47 @@ if __name__ == "__main__":
         observer.stop()
 
     observer.join()
+
+# ===== AUTO LOOP (REPLACES WATCHER) =====
+
+CHECK_INTERVAL = 10  # seconds
+
+def get_all_models():
+    teams = []
+
+    for team in os.listdir(SUBMISSIONS_DIR):
+        team_path = os.path.join(SUBMISSIONS_DIR, team)
+        model_path = os.path.join(team_path, "model.pkl")
+
+        if os.path.isdir(team_path) and os.path.exists(model_path):
+            teams.append(team)
+
+    return sorted(teams)
+
+
+last_state = []
+
+if __name__ == "__main__":
+
+    print("🔁 Starting auto polling system...")
+
+    while True:
+        try:
+            current_state = get_all_models()
+
+            # only run if something changed
+            if current_state != last_state:
+                print("\n📦 Change detected in submissions!")
+                print("Teams:", current_state)
+
+                run_pipeline()
+
+                last_state = current_state.copy()
+
+            else:
+                print("⏳ No changes...")
+
+        except Exception as e:
+            print("❌ Error:", e)
+
+        time.sleep(CHECK_INTERVAL)
