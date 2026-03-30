@@ -64,7 +64,7 @@
 </table>
 
 <script>
-fetch('./leaderboard.json')
+fetch('./leaderboard.json?t=' + new Date().getTime())
 .then(res => res.json())
 .then(data => {
     let table = document.getElementById("leaderboard");
@@ -76,18 +76,13 @@ fetch('./leaderboard.json')
 
         let tr = document.createElement("tr");
 
-        // medals
-        if (i === 0) tr.classList.add("gold");
-        else if (i === 1) tr.classList.add("silver");
-        else if (i === 2) tr.classList.add("bronze");
-
         let medal = "";
         if (i === 0) medal = "🥇";
         else if (i === 1) medal = "🥈";
         else if (i === 2) medal = "🥉";
 
         tr.innerHTML = `
-            <td class="badge">${medal} ${i+1}</td>
+            <td>${medal} ${i+1}</td>
             <td>${row.Team}</td>
             <td>${mse}</td>
         `;
@@ -95,9 +90,7 @@ fetch('./leaderboard.json')
         table.appendChild(tr);
     });
 })
-.catch(err => {
-    console.error("Error loading leaderboard:", err);
-});
+.catch(err => console.error("Error:", err));
 </script>
 
 </body>
