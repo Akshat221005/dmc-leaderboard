@@ -110,9 +110,10 @@ def run_pipeline():
 
         # ===== GIT PUSH =====
         print("📤 Pushing to GitHub...")
-        subprocess.run(["git", "add", "."], cwd=BASE_DIR)
-        subprocess.run(["git", "commit", "-m", "auto update leaderboard"], cwd=BASE_DIR)
-        subprocess.run(["git", "push"], cwd=BASE_DIR)
+        subprocess.run(
+        ["git", "push", "origin", "main", "--force"],
+        cwd=BASE_DIR
+        )
 
         print("🚀 Live leaderboard updated!\n")
 
