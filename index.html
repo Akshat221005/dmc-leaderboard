@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DMC Leaderboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            margin: auto;
+            border-collapse: collapse;
+            width: 60%;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th {
+            background-color: #222;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .gold { background-color: #ffd70033; }
+        .silver { background-color: #c0c0c033; }
+        .bronze { background-color: #cd7f3233; }
+
+        .badge {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚮 DMC Leaderboard</h1>
+
+<table id="leaderboard">
+    <tr>
+        <th>Rank</th>
+        <th>Team</th>
+        <th>MSE</th>
+    </tr>
+</table>
+
+<script>
+fetch('./leaderboard.json')
+.then(res => res.json())
+.then(data => {
+    let table = document.getElementById("leaderboard");
+
+    data.forEach((row, i) => {
+        let mse = (row.MSE !== null && !isNaN(row.MSE))
+            ? Number(row.MSE).toFixed(4)
+            : "N/A";
+
+        let tr = document.createElement("tr");
+
+        // medals
+        if (i === 0) tr.classList.add("gold");
+        else if (i === 1) tr.classList.add("silver");
+        else if (i === 2) tr.classList.add("bronze");
+
+        let medal = "";
+        if (i === 0) medal = "🥇";
+        else if (i === 1) medal = "🥈";
+        else if (i === 2) medal = "🥉";
+
+        tr.innerHTML = `
+            <td class="badge">${medal} ${i+1}</td>
+            <td>${row.Team}</td>
+            <td>${mse}</td>
+        `;
+
+        table.appendChild(tr);
+    });
+})
+.catch(err => {
+    console.error("Error loading leaderboard:", err);
+});
+</script>
+
+</body>
+</html>
