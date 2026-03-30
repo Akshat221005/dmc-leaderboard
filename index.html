@@ -8,20 +8,26 @@
     <table border="1" id="table"></table>
 
     <script>
-        fetch('leaderboard.json')
-        .then(res => res.json())
-        .then(data => {
-            let table = document.getElementById("table");
+fetch('./leaderboard.json')
+.then(res => res.json())
+.then(data => {
+    let table = document.getElementById("leaderboard");
 
-            data.forEach((row, i) => {
-                let tr = `<tr>
-                    <td>${i+1}</td>
-                    <td>${row.Team}</td>
-                    <td>${row.MSE.toFixed(4)}</td>
-                </tr>`;
-                table.innerHTML += tr;
-            });
-        });
-    </script>
+    data.forEach((row, i) => {
+        let mse = row.MSE !== null ? row.MSE.toFixed(4) : "N/A";
+
+        let tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${i+1}</td>
+            <td>${row.Team}</td>
+            <td>${mse}</td>
+        `;
+
+        table.appendChild(tr);
+    });
+})
+.catch(err => console.error("Error:", err));
+</script>
 </body>
 </html>
