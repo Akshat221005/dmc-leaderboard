@@ -137,30 +137,6 @@ def run_pipeline():
     except Exception as e:
         print("❌ Pipeline error:", e)
 
-# ===== WATCHER =====
-class SubmissionHandler(FileSystemEventHandler):
-
-    def on_created(self, event):
-
-        # Case 1: new team folder
-        if event.is_directory:
-            team = os.path.basename(event.src_path)
-            print(f"\n📂 New folder detected: {team}")
-
-            time.sleep(3)
-
-            check_and_run(team)
-
-        # Case 2: file added (IMPORTANT)
-        else:
-            if "model.pkl" in event.src_path:
-                team = os.path.basename(os.path.dirname(event.src_path))
-                print(f"\n📦 Model uploaded for: {team}")
-
-                time.sleep(3)
-
-                check_and_run(team)
-
 
 def check_and_run(team):
     team_path = os.path.join(SUBMISSIONS_DIR, team)
@@ -172,30 +148,8 @@ def check_and_run(team):
     else:
         print(f"⏳ Waiting for model.pkl in {team}")
 
-# ===== MAIN =====
-if __name__ == "__main__":
-
-    print("👀 Starting DMC Auto System...")
-
-    # Run once at start
-    run_pipeline()
-
-    # Start watcher
-    observer = Observer()
-    observer.schedule(SubmissionHandler(), SUBMISSIONS_DIR, recursive=False)
-    observer.start()
-
-    print("👀 Watching for new submissions...")
-
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-
-    observer.join()
-
 # ===== AUTO LOOP (REPLACES WATCHER) =====
+# ===== AUTO LOOP =====
 
 CHECK_INTERVAL = 10  # seconds
 
@@ -222,19 +176,14 @@ if __name__ == "__main__":
         try:
             current_state = get_all_models()
 
-            # only run if something changed
             if current_state != last_state:
-                print("\n📦 Change detected in submissions!")
-                print("Teams:", current_state)
-
+                print("\n📦 Change detected!")
                 run_pipeline()
-
                 last_state = current_state.copy()
-
             else:
                 print("⏳ No changes...")
 
         except Exception as e:
             print("❌ Error:", e)
 
-        time.sleep(CHECK_INTERVAL)
+        time.sleep(10)
