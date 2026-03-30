@@ -121,16 +121,39 @@ def run_pipeline():
 
 # ===== WATCHER =====
 class SubmissionHandler(FileSystemEventHandler):
+
     def on_created(self, event):
+
+        # Case 1: new team folder
         if event.is_directory:
             team = os.path.basename(event.src_path)
-            print(f"\n🚀 New submission detected: {team}")
+            print(f"\n📂 New folder detected: {team}")
 
-            # wait for Google Drive sync
-            time.sleep(5)
+            time.sleep(3)
 
-            run_pipeline()
+            check_and_run(team)
 
+        # Case 2: file added (IMPORTANT)
+        else:
+            if "model.pkl" in event.src_path:
+                team = os.path.basename(os.path.dirname(event.src_path))
+                print(f"\n📦 Model uploaded for: {team}")
+
+                time.sleep(3)
+
+                check_and_run(team)
+
+
+def check_and_run(team):
+    team_path = os.path.join(SUBMISSIONS_DIR, team)
+    model_path = os.path.join(team_path, "model.pkl")
+
+    if os.path.exists(model_path):
+        print(f"✅ Valid submission found: {team}")
+        run_pipeline()
+    else:
+        print(f"⏳ Waiting for model.pkl in {team}")
+        
 # ===== MAIN =====
 if __name__ == "__main__":
 
