@@ -51,9 +51,9 @@ def extract_zip_submissions():
             team_name = file.replace(".zip", "")
             extract_path = os.path.join(SUBMISSIONS_DIR, team_name)
 
-            # Skip if already extracted
+            # Remove old extracted folder (if exists)
             if os.path.exists(extract_path):
-                continue
+                shutil.rmtree(extract_path)
 
             print(f"📦 Extracting {file}...")
 
@@ -61,10 +61,17 @@ def extract_zip_submissions():
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(extract_path)
 
-                    fix_nested_folders(extract_path)
-            except:
-                print(f"❌ Failed to extract {file}")
+                # ✅ Fix nested structure
+                fix_nested_folders(extract_path)
 
+                # ✅ DELETE ZIP HERE (important)
+                os.remove(zip_path)
+                print(f"🗑️ Deleted {file}")
+
+            except Exception as e:
+                print(f"❌ Failed to extract {file}:", e)
+
+                
 # ===== PREPROCESS =====
 def preprocess(image_path):
     img = Image.open(image_path).convert("RGB")
@@ -130,7 +137,7 @@ def run_pipeline():
         test_images = list(gt_dict.keys())
 
         results = []
-
+        print("📊 Results:", results)
         for team in os.listdir(SUBMISSIONS_DIR):
             if not os.path.isdir(os.path.join(SUBMISSIONS_DIR, team)):
                 continue
@@ -144,7 +151,7 @@ def run_pipeline():
         df = pd.DataFrame(leaderboard, columns=["Team", "MSE"])
         df.to_csv(LEADERBOARD_CSV, index=False)
         df.to_json(LEADERBOARD_JSON, orient="records")
-
+        print("✅ JSON WRITTEN")
         print("📊 Leaderboard updated!")
 
         # ===== GIT PUSH =====
@@ -192,20 +199,16 @@ def check_and_run(team):
 
 CHECK_INTERVAL = 10  # seconds
 
-def get_all_models():
-    teams = []
+def get_submission_state():
+    state = []
 
-    for team in os.listdir(SUBMISSIONS_DIR):
-        team_path = os.path.join(SUBMISSIONS_DIR, team)
-        model_path = os.path.join(team_path, "model.pkl")
+    for root, dirs, files in os.walk(SUBMISSIONS_DIR):
+        for name in files:
+            state.append(os.path.join(root, name))
 
-        if os.path.isdir(team_path) and os.path.exists(model_path):
-            teams.append(team)
+    return sorted(state)
 
-    return sorted(teams)
-
-
-last_state = []
+last_state = None
 
 if __name__ == "__main__":
 
@@ -213,7 +216,11 @@ if __name__ == "__main__":
 
     while True:
         try:
-            current_state = get_all_models()
+            extract_zip_submissions()   # 👈 ADD THIS LINE ALSO
+
+            current_state = get_submission_state()
+
+            print("📂 Current state:", current_state)
 
             if current_state != last_state:
                 print("\n📦 Change detected!")
