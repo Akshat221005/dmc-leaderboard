@@ -6,7 +6,8 @@ from PIL import Image
 import time
 import random
 import subprocess
-
+import zipfile
+import shutil
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -21,10 +22,48 @@ LEADERBOARD_JSON = os.path.join(BASE_DIR, "leaderboard.json")
 
 TIMEOUT_PER_IMAGE = 5
 
+#some code
+def fix_nested_folders(team_path):
+    inner_items = os.listdir(team_path)
+
+    if len(inner_items) == 1:
+        inner_path = os.path.join(team_path, inner_items[0])
+
+        if os.path.isdir(inner_path):
+            for item in os.listdir(inner_path):
+                shutil.move(
+                    os.path.join(inner_path, item),
+                    team_path
+                )
+            os.rmdir(inner_path)
+
 # ===== LOAD GT =====
 def load_ground_truth():
     gt_df = pd.read_csv(GT_PATH)
     return dict(zip(gt_df["image"], gt_df["label"]))
+
+#unzipper
+def extract_zip_submissions():
+    for file in os.listdir(SUBMISSIONS_DIR):
+        if file.endswith(".zip"):
+            zip_path = os.path.join(SUBMISSIONS_DIR, file)
+
+            team_name = file.replace(".zip", "")
+            extract_path = os.path.join(SUBMISSIONS_DIR, team_name)
+
+            # Skip if already extracted
+            if os.path.exists(extract_path):
+                continue
+
+            print(f"📦 Extracting {file}...")
+
+            try:
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(extract_path)
+
+                    fix_nested_folders(extract_path)
+            except:
+                print(f"❌ Failed to extract {file}")
 
 # ===== PREPROCESS =====
 def preprocess(image_path):
@@ -85,7 +124,7 @@ def evaluate_team(team, gt_dict, test_images):
 # ===== RUN FULL PIPELINE =====
 def run_pipeline():
     print("\n⚙️ Running full evaluation pipeline...")
-
+    extract_zip_submissions()
     try:
         gt_dict = load_ground_truth()
         test_images = list(gt_dict.keys())
