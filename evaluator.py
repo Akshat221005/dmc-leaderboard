@@ -12,7 +12,7 @@ from watchdog.events import FileSystemEventHandler
 
 # ===== CONFIG =====
 BASE_DIR = r"G:\My Drive\DMC_Competitions"
-SUBMISSIONS_DIR = os.path.join(BASE_DIR, "submissions")
+SUBMISSIONS_DIR = os.path.join(BASE_DIR, "submissions (File responses)")
 TEST_DIR = os.path.join(BASE_DIR, "test_dataset")
 GT_PATH = os.path.join(BASE_DIR, "ground_truth.csv")
 
@@ -115,7 +115,10 @@ def run_pipeline():
             cwd=BASE_DIR
         )
 
-        subprocess.run(["git", "add", "."], cwd=BASE_DIR)
+        subprocess.run(
+            ["git", "add", "leaderboard.json", "leaderboard.csv"],
+            cwd=BASE_DIR
+        )
 
         subprocess.run(
             ["git", "commit", "-m", "auto update leaderboard"],
@@ -124,13 +127,10 @@ def run_pipeline():
         )
 
         subprocess.run(
-            ["git", "push", "origin", "main", "--force"],
+            ["git", "push", "origin", "main"],
             cwd=BASE_DIR
         )
-        subprocess.run(
-                ["git", "push", "origin", "main", "--force"],
-                cwd=BASE_DIR
-                )
+        
 
         print("🚀 Live leaderboard updated!\n")
 
