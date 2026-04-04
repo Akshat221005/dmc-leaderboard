@@ -70,8 +70,8 @@ fetch('./leaderboard.json?t=' + new Date().getTime())
     let table = document.getElementById("leaderboard");
 
     data.forEach((row, i) => {
-        let mse = (row.MSE !== null && !isNaN(row.MSE))
-            ? Number(row.MSE).toFixed(4)
+        let score_val = (row.Score !== null && !isNaN(row.Score))
+            ? Number(row.Score).toFixed(4)
             : "N/A";
 
         let tr = document.createElement("tr");
@@ -84,7 +84,7 @@ fetch('./leaderboard.json?t=' + new Date().getTime())
         tr.innerHTML = `
             <td>${medal} ${i+1}</td>
             <td>${row.Team}</td>
-            <td>${mse}</td>
+            <td>${score_val}</td>
         `;
 
         table.appendChild(tr);
